@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(BestPriceApp());
 }
 
-class MyApp extends StatelessWidget {
+class BestPriceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const title = 'Find Best Price!';
@@ -50,35 +50,150 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     List<Widget> elementList = [];
 
-    // Add button
+    // Add and clear all button
     elementList.add(
-      ElevatedButton.icon(
-          icon: const Icon(Icons.add),
-          label: const Text('Add'),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => _InputPrice(0, 0, 1, 1, "", _fetchItems),
+      Row(
+        spacing: 40,
+        children: <Widget>[
+          // Add button
+          Expanded(
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Add'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => _InputPrice(0, 0, 1, 1, "", _fetchItems),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Clear all button
+          Expanded(
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Clear all'),
+              onPressed: () => showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: const Text('Delete'),
+                  content: const Text('Clear all data'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await _MainScreenState.dbHelper.deleteAllPrice();
+                        _fetchItems();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text('Yes'),
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-        ),
+            )
+          ),
+        ]
+      )
+    );
+
+
+    // header
+    elementList.add(
+      Row(
+        children: <Widget>[
+          // Add button
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Price ",
+                  ),
+                  WidgetSpan(
+                    child: Icon(Icons.monetization_on_rounded, size: 14),
+                  ),
+                ],
+              ),
+            )
+          ),
+
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Piece ",
+                  ),
+                  WidgetSpan(
+                    child: Icon(Icons.question_mark, size: 14),
+                  ),
+                ],
+              ),
+            )
+          ),
+
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Quantity ",
+                  ),
+                  WidgetSpan(
+                    child: Icon(Icons.water_drop_rounded, size: 14),
+                  ),
+                ],
+              ),
+            )
+          ),
+        ]
+      )
     );
 
     // list items
-    for(var i = 0; i < items.length; i++){
-        elementList.add(_ItemList(items[i].id, items[i].price, items[i].piece, items[i].quantity, items[i].note, _fetchItems));
+    if (items.isEmpty) {
+      elementList.add(const SizedBox(height: 20), );
+    } else {
+      for(var i = 0; i < items.length; i++){
+          elementList.add(_ItemList(items[i].id, items[i].price, items[i].piece, items[i].quantity, items[i].note, _fetchItems));
+      }
     }
 
-    return SizedBox(
-      width: double.maxFinite,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: elementList
+    elementList.add(
+      ElevatedButton.icon(
+        // icon: const Icon(Icons.add),
+        label: const Text('Calculate!'),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => ResultScreen(),
+            ),
+          );
+        },
+      ),
+    );
+
+    return Padding(
+      padding: EdgeInsets.all(20.0),
+      child: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 20.0,
+            children: elementList
+            )
         )
     );
-    // Column(children: items.map((item) => _TestTextList(item.id, item.name, item.age)).toList());
   }
 }
 
@@ -162,15 +277,13 @@ class _InputPrice extends StatefulWidget {
   final int price;
   final int piece;
   final int quantity;
-  final String note;
+  final String? note;
   final Future<void> Function() _fetchItems;
 
-  // _InputPrice({ Key? key, this.id, this.name, this.age }): super(key: key);
   _InputPrice(this.id, this.price, this.piece, this.quantity, this.note, this._fetchItems);
 
   @override
  _InputPriceState createState() => _InputPriceState();
-  // const _InputPrice(this.id, this.name, this.age);
 }
 
 class _InputPriceState extends State<_InputPrice> {
@@ -178,10 +291,10 @@ class _InputPriceState extends State<_InputPrice> {
   
   @override
   Widget build(BuildContext context) {
-    TextEditingController priceController = TextEditingController(text: widget.price != null ? widget.price.toString() : '0');
-    TextEditingController pieceController = TextEditingController(text: widget.piece != null ? widget.piece.toString() : '1');
-    TextEditingController quantityController = TextEditingController(text: widget.quantity != null ? widget.quantity.toString() : '1');
-    TextEditingController noteController = TextEditingController(text: widget.note != null ? widget.note : '');
+    TextEditingController priceController = TextEditingController(text: widget.price.toString());
+    TextEditingController pieceController = TextEditingController(text: widget.piece.toString());
+    TextEditingController quantityController = TextEditingController(text: widget.quantity.toString());
+    TextEditingController noteController = TextEditingController(text: widget.note ?? '');
 
     return Scaffold(
       body: //Container()
@@ -198,7 +311,6 @@ class _InputPriceState extends State<_InputPrice> {
               decoration: const InputDecoration(
                 hintText: 'Please write a name',
               ),
-              // initialValue: widget.name, //"Test"
               validator: (value) {
                   if (value == null || value.isEmpty) {
                       return 'Enter valid data';
@@ -214,7 +326,6 @@ class _InputPriceState extends State<_InputPrice> {
               decoration: const InputDecoration(
                 hintText: 'Please write a piece',
               ),
-              // initialValue: widget.age != null ? 'widget.age.toString()' : '',
               inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly
                   ],
@@ -233,7 +344,6 @@ class _InputPriceState extends State<_InputPrice> {
               decoration: const InputDecoration(
                 hintText: 'Please write a quantity',
               ),
-              // initialValue: widget.age != null ? 'widget.age.toString()' : '',
               inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly
                   ],
@@ -284,6 +394,32 @@ class _InputPriceState extends State<_InputPrice> {
           ],
         )
         )
+    );
+  }
+}
+
+
+class ResultScreen extends StatelessWidget {
+  // final int? id;
+  // final String? name;
+  // final int? age;
+
+  // const ResultScreen(this.id, this.name, this.age);
+  const ResultScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Result screen (test)')),
+      body: 
+      Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Go back!'),
+        ),
+      ),
     );
   }
 }

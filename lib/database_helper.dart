@@ -1,16 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-
-import 'package:flutter/foundation.dart'; // for kIsWeb
-import 'dart:io'; //for Platform
-import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart'; // for databaseFactoryFfiWeb
-// import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // for databaseFactoryFfi
-
 import 'package:flutter/widgets.dart';
-// import 'package:path/path.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart'; // for databaseFactoryFfiWeb
 import 'package:path_provider/path_provider.dart';
-// import 'package:sqflite/sqflite.dart';
-// import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class ProductPrice {
   final int id;
@@ -51,16 +44,6 @@ class DatabaseHelper {
     String pathDb;
     WidgetsFlutterBinding.ensureInitialized();
 
-    // if (kIsWeb) {
-    //   databaseFactory = databaseFactoryFfiWeb;
-    //   pathDb = 'ProductPrice_database.db'; 
-    // } else {
-    //   // if (Platform.isLinux || Platform.isWindows) {
-    //   //   databaseFactory = databaseFactoryFfi;
-    //   // }
-    //   pathDb = join(await getDatabasesPath(), 'ProductPrice_database.db');
-    // }
-
     if (kIsWeb) {
       databaseFactoryOrNull = databaseFactoryFfiWeb;
       pathDb = 'ProductPrice_database.db'; 
@@ -70,7 +53,6 @@ class DatabaseHelper {
       pathDb = join(databasesPath.path, 'ProductPrice_database.db');
     }
 
-    // String path = join(await getDatabasesPath(), 'app_database.db');
     return await openDatabase(
       pathDb,
       version: 1,
@@ -83,17 +65,15 @@ class DatabaseHelper {
       '''
       CREATE TABLE product_price (
         id INTEGER PRIMARY KEY, 
-        price INTEGER,
+        price DECIMAL(9, 2),
         piece INTEGER,
-        quantity INTEGER,
+        quantity DECIMAL(9, 2),
+        calculate DECIMAL(9, 2)
         note TEXT
       )
       '''
     );
   }
-
-
-
 
 
   Future<List<ProductPrice>> fetchPrice() async {
@@ -140,5 +120,12 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+
+  Future<int> deleteAllPrice() async {
+    final db = await database;
+
+    return await db.rawDelete("DELETE FROM product_price");
   }
 }
