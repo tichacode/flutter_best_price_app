@@ -68,7 +68,7 @@ class DatabaseHelper {
         price DECIMAL(9, 2),
         piece INTEGER,
         quantity DECIMAL(9, 2),
-        calculate DECIMAL(9, 2)
+        calculate DECIMAL(9, 2),
         note TEXT
       )
       '''

@@ -112,7 +112,9 @@ class _MainScreenState extends State<MainScreen> {
         children: <Widget>[
           // Add button
           Expanded(
+            flex: 3,
             child: RichText(
+              textAlign: TextAlign.center,
               text: TextSpan(
                 children: [
                   TextSpan(
@@ -127,7 +129,9 @@ class _MainScreenState extends State<MainScreen> {
           ),
 
           Expanded(
+            flex: 3,
             child: RichText(
+              textAlign: TextAlign.center,
               text: TextSpan(
                 children: [
                   TextSpan(
@@ -142,7 +146,9 @@ class _MainScreenState extends State<MainScreen> {
           ),
 
           Expanded(
+            flex: 3,
             child: RichText(
+              textAlign: TextAlign.center,
               text: TextSpan(
                 children: [
                   TextSpan(
@@ -155,6 +161,16 @@ class _MainScreenState extends State<MainScreen> {
               ),
             )
           ),
+
+          Expanded(
+            flex: 1,
+            child: 
+            // ColoredBox(
+            //   color: Colors.blue,
+            //   child: 
+              SizedBox(height: 10,),
+            // )
+          )
         ]
       )
     );
@@ -173,13 +189,29 @@ class _MainScreenState extends State<MainScreen> {
         // icon: const Icon(Icons.add),
         label: const Text('Calculate!'),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (context) => ResultScreen(),
-            ),
-          );
-        },
+          if (items.isEmpty) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Warning!'),
+                content: const Text('No data for calculate, please fill data.'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  )
+                ],
+              ),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => ResultScreen(),
+              ),
+            );
+          }
+        }
       ),
     );
 
@@ -188,7 +220,7 @@ class _MainScreenState extends State<MainScreen> {
       child: SizedBox(
           width: double.maxFinite,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            // crossAxisAlignment: CrossAxisAlignment.center,
             spacing: 20.0,
             children: elementList
             )
@@ -209,66 +241,169 @@ class _ItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        // Expanded(
-        //   child: Text(id.toString(), textAlign: TextAlign.center),
-        // ),
-        Expanded(
-          child: Text(price.toString(), textAlign: TextAlign.center),
-        ),
-        Expanded(
-          child: Text(piece.toString(), textAlign: TextAlign.center),
-        ),
-        Expanded(
-          child: Text(quantity.toString(), textAlign: TextAlign.center),
-        ),
-        Expanded(
-          child: Text(note, textAlign: TextAlign.center),
-        ),
+    List<Widget> dataRowList = [];
 
-        // Edit button
-        IconButton (
-          icon: const Icon(Icons.edit),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => _InputPrice(id, price, piece, quantity, note, _fetchItems),
-              ),
-            );
-          },
-        ),
-
-        // Delete button
-        IconButton (
-          icon: const Icon(Icons.delete),
-          onPressed: () => showDialog<String>(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: const Text('Delete'),
-              content: const Text('Delete this row'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await _MainScreenState.dbHelper.deletePrice(id);
-                    _fetchItems();
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Yes'),
-                ),
-              ],
-            ),
+    dataRowList.add(
+      Row(
+        children: <Widget>[
+          // Expanded(
+          //   child: Text(id.toString(), textAlign: TextAlign.center),
+          // ),
+          Expanded(
+            flex: 30,
+            child: Text(price.toString(), textAlign: TextAlign.center),
           ),
-        ),
-      ]
+          Expanded(
+            flex: 30,
+            child: Text(piece.toString(), textAlign: TextAlign.center),
+          ),
+          Expanded(
+            flex: 30,
+            child: Text(quantity.toString(), textAlign: TextAlign.center),
+          ),
+          // Expanded(
+          //   child: Text(note, textAlign: TextAlign.center),
+          // ),
+
+          Expanded(
+            flex: 5,
+            child:
+              // Edit button
+              IconButton (
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (context) => _InputPrice(id, price, piece, quantity, note, _fetchItems),
+                    ),
+                  );
+                },
+              ),
+          ),
+
+          Expanded(
+            flex: 5,
+            child: 
+              // Delete button
+              IconButton (
+                icon: const Icon(Icons.delete),
+                onPressed: () => showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: const Text('Delete'),
+                    content: const Text('Delete this row'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await _MainScreenState.dbHelper.deletePrice(id);
+                          _fetchItems();
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: const Text('Yes'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          )
+
+          
+        ]
+      )
     );
+
+    dataRowList.add(
+      Row(
+        children: <Widget>[
+          Expanded(
+            // flex: 3,
+            child: Text('Note: $note', textAlign: TextAlign.left),
+          )
+        ]
+      )
+    );
+
+    return 
+      SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          // spacing: 20.0,
+          children: dataRowList
+        )
+      );
+
+    // return Row(
+    //   children: <Widget>[
+    //     // Expanded(
+    //     //   child: Text(id.toString(), textAlign: TextAlign.center),
+    //     // ),
+    //     Expanded(
+    //       flex: 3,
+    //       child: Text(price.toString(), textAlign: TextAlign.center),
+    //     ),
+    //     Expanded(
+    //       flex: 3,
+    //       child: Text(piece.toString(), textAlign: TextAlign.center),
+    //     ),
+    //     Expanded(
+    //       flex: 3,
+    //       child: Text(quantity.toString(), textAlign: TextAlign.center),
+    //     ),
+    //     Expanded(
+    //       child: Text(note, textAlign: TextAlign.center),
+    //     ),
+
+    //     // Edit button
+    //     IconButton (
+    //       icon: const Icon(Icons.edit),
+    //       onPressed: () {
+    //         Navigator.push(
+    //           context,
+    //           MaterialPageRoute<void>(
+    //             builder: (context) => _InputPrice(id, price, piece, quantity, note, _fetchItems),
+    //           ),
+    //         );
+    //       },
+    //     ),
+
+    //     // Delete button
+    //     IconButton (
+    //       icon: const Icon(Icons.delete),
+    //       onPressed: () => showDialog<String>(
+    //         context: context,
+    //         builder: (BuildContext context) => AlertDialog(
+    //           title: const Text('Delete'),
+    //           content: const Text('Delete this row'),
+    //           actions: <Widget>[
+    //             TextButton(
+    //               onPressed: () => Navigator.pop(context),
+    //               child: const Text('Cancel'),
+    //             ),
+    //             TextButton(
+    //               onPressed: () async {
+    //                 await _MainScreenState.dbHelper.deletePrice(id);
+    //                 _fetchItems();
+    //                 if (context.mounted) {
+    //                   Navigator.pop(context);
+    //                 }
+    //               },
+    //               child: const Text('Yes'),
+    //             ),
+    //           ],
+    //         ),
+    //       ),
+    //     ),
+    //   ]
+    // );
+    
   }
 }
 
