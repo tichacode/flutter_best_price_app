@@ -8,8 +8,9 @@ import 'package:path_provider/path_provider.dart';
 class ProductPrice {
   final int id;
   final int price;
-  final int piece;
-  final int quantity; //per unit
+  final double piece;
+  final double quantity; //per unit
+  // double calculate;
   final String note;
 
   ProductPrice({required this.id, required this.price, required this.piece, required this.quantity, required this.note});
@@ -23,6 +24,18 @@ class ProductPrice {
     return 'Dog{id: $id, price: $price, piece: $piece, quantity: $quantity, note: $note}';
   }
 }
+
+class ProductCal {
+  final int id;
+  final int price;
+  final double piece;
+  final double quantity; //per unit
+  final double calculate;
+  final String note;
+
+  ProductCal({required this.id, required this.price, required this.piece, required this.quantity, required this.calculate, required this.note});
+}
+
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -82,10 +95,62 @@ class DatabaseHelper {
     final List<Map<String, Object?>> priceMaps = await db.query('product_price');
 
     return [
-      for (final {'id': id as int, 'price': price as int, 'piece': piece as int, 'quantity': quantity as int, 'note': note as String}
+      for (final {'id': id as int, 'price': price as int, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String}
           in priceMaps)
         ProductPrice(id: id, price: price, piece: piece, quantity: quantity, note:note),
     ];
+  }
+
+  Future<List<ProductCal>> calculatePrice() async {
+    final db = await database;
+    List<ProductCal> item = [];
+    double calVal;
+
+    final List<Map<String, Object?>> priceMaps = await db.query('product_price');
+
+    for (final {'id': id as int, 'price': price as int, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String} in priceMaps) {
+        calVal = price / (piece * quantity);
+        item.add(ProductCal(id: id, price: price, piece: piece, quantity: quantity, calculate: calVal, note:note));
+        _updateCalculate(id, calVal);
+    }
+
+    return item;
+  }
+
+  Future<int> _updateCalculate(int id, double calValue) async {
+    final db = await database;
+
+    return await db.update(
+      'product_price',
+      {'calculate': calValue},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<double>> bestPrice() async {
+    final db = await database;
+
+    // await db.execute(
+    //   '''
+    //   SELECT *
+    //   FROM product_price
+    //   ORDER BY calculate DESC
+    //   LIMIT 3;
+    //   '''
+    // );
+
+    final List<Map<String, dynamic>> results = await db.rawQuery(
+      '''
+        SELECT DISTINCT calculate
+        FROM product_price 
+        ORDER BY calculate DESC 
+        LIMIT 3
+      ''',
+    );
+
+    // Extract the IDs into a list of integers
+    return results.map((row) => row['calculate'] as double).toList();
   }
 
 
