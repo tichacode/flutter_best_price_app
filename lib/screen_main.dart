@@ -1,15 +1,13 @@
-import 'main.dart';
 import 'screen_result.dart';
 import 'database_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 
 
 class MainScreen extends StatefulWidget {
   @override
   MainScreenState createState() => MainScreenState();
 }
-
 
 class MainScreenState extends State<MainScreen> {
   static final dbHelper = DatabaseHelper();
@@ -22,7 +20,6 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _fetchItems() async {
-    //test: dbHelper.addPrice(ProductPrice(id: 0, price: 0, piece: 1, quantity: 1, note: "test"));
     final data = await dbHelper.fetchPrice();
     setState(() {
       items = data;
@@ -93,9 +90,9 @@ class MainScreenState extends State<MainScreen> {
     elementList.add(
       Row(
         children: <Widget>[
-          // Add button
+          // header: price
           Expanded(
-            flex: 3,
+            flex: 28,
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -111,8 +108,9 @@ class MainScreenState extends State<MainScreen> {
             )
           ),
 
+          // header: piece
           Expanded(
-            flex: 3,
+            flex: 28,
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -128,8 +126,9 @@ class MainScreenState extends State<MainScreen> {
             )
           ),
 
+          // header: quantity
           Expanded(
-            flex: 3,
+            flex: 28,
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -145,8 +144,9 @@ class MainScreenState extends State<MainScreen> {
             )
           ),
 
+          // gap in header
           Expanded(
-            flex: 1,
+            flex: 16,
             child: 
             // ColoredBox(
             //   color: Colors.blue,
@@ -168,8 +168,8 @@ class MainScreenState extends State<MainScreen> {
     }
 
     elementList.add(
+      // Calculate button
       ElevatedButton.icon(
-        // icon: const Icon(Icons.add),
         label: const Text('Calculate!'),
         onPressed: () {
           if (items.isEmpty) {
@@ -214,7 +214,7 @@ class MainScreenState extends State<MainScreen> {
 
 class _ItemList extends StatelessWidget {
   final int id;
-  final int price;
+  final double price;
   final double piece;
   final double quantity;
   final String note;
@@ -233,23 +233,20 @@ class _ItemList extends StatelessWidget {
           //   child: Text(id.toString(), textAlign: TextAlign.center),
           // ),
           Expanded(
-            flex: 30,
+            flex: 28,
             child: Text(price.toString(), textAlign: TextAlign.center),
           ),
           Expanded(
-            flex: 30,
+            flex: 28,
             child: Text(piece.toString(), textAlign: TextAlign.center),
           ),
           Expanded(
-            flex: 30,
+            flex: 28,
             child: Text(quantity.toString(), textAlign: TextAlign.center),
           ),
-          // Expanded(
-          //   child: Text(note, textAlign: TextAlign.center),
-          // ),
 
           Expanded(
-            flex: 5,
+            flex: 8,
             child:
               // Edit button
               IconButton (
@@ -266,7 +263,7 @@ class _ItemList extends StatelessWidget {
           ),
 
           Expanded(
-            flex: 5,
+            flex: 8,
             child: 
               // Delete button
               IconButton (
@@ -296,8 +293,6 @@ class _ItemList extends StatelessWidget {
                 ),
               ),
           )
-
-          
         ]
       )
     );
@@ -322,15 +317,13 @@ class _ItemList extends StatelessWidget {
           children: dataRowList
         )
       );
-
-    
   }
 }
 
 
 class _InputPrice extends StatefulWidget {
   final int id;
-  final int price;
+  final double price;
   final double piece;
   final double quantity;
   final String? note;
@@ -369,7 +362,9 @@ class _InputPriceState extends State<_InputPrice> {
               ),
               validator: (value) {
                   if (value == null || value.isEmpty) {
-                      return 'Enter valid data';
+                    return 'Enter valid data';
+                  } else if (double.parse(value) < 0) {
+                    return 'Price value must not less than 0';
                   }
                   return null;
               },
@@ -382,12 +377,14 @@ class _InputPriceState extends State<_InputPrice> {
               decoration: const InputDecoration(
                 hintText: 'Please write a piece',
               ),
-              inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly
-                  ],
+              // inputFormatters: <TextInputFormatter>[
+              //       FilteringTextInputFormatter.digitsOnly
+              //     ],
               validator: (value) {
                   if (value == null || value.isEmpty) {
                       return 'Enter valid data';
+                  } else if (double.parse(value) < 0) {
+                    return 'Piece value must not less than 0';
                   }
                   return null;
               },
@@ -400,12 +397,14 @@ class _InputPriceState extends State<_InputPrice> {
               decoration: const InputDecoration(
                 hintText: 'Please write a quantity',
               ),
-              inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly
-                  ],
+              // inputFormatters: <TextInputFormatter>[
+              //       FilteringTextInputFormatter.digitsOnly
+              //     ],
               validator: (value) {
                   if (value == null || value.isEmpty) {
                       return 'Enter valid data';
+                  } else if (double.parse(value) < 0) {
+                    return 'Quantity value must not less than 0';
                   }
                   return null;
               },
@@ -423,7 +422,7 @@ class _InputPriceState extends State<_InputPrice> {
             TextButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  var priceData = ProductPrice(id: widget.id, price: int.parse(priceController.text), piece: double.parse(pieceController.text), quantity: double.parse(quantityController.text), note: noteController.text);
+                  var priceData = ProductPrice(id: widget.id, price: double.parse(priceController.text), piece: double.parse(pieceController.text), quantity: double.parse(quantityController.text), note: noteController.text);
                   if (widget.id == 0) {
                     await MainScreenState.dbHelper.addPrice(priceData);
                   } else {

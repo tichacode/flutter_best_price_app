@@ -14,7 +14,7 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Result screen (test)')),
+      appBar: AppBar(title: Text('Find Best Price!')),
       body: CalculateResultScreen()
       // Center(
       //   child: ElevatedButton(
@@ -100,7 +100,7 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
 class _ItemResultList extends StatelessWidget {
   final int rank;
   final int id;
-  final int price;
+  final double price;
   final double piece;
   final double quantity;
   final double calculateVal;

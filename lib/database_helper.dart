@@ -7,10 +7,9 @@ import 'package:path_provider/path_provider.dart';
 
 class ProductPrice {
   final int id;
-  final int price;
+  final double price;
   final double piece;
   final double quantity; //per unit
-  // double calculate;
   final String note;
 
   ProductPrice({required this.id, required this.price, required this.piece, required this.quantity, required this.note});
@@ -27,7 +26,7 @@ class ProductPrice {
 
 class ProductCal {
   final int id;
-  final int price;
+  final double price;
   final double piece;
   final double quantity; //per unit
   final double calculate;
@@ -78,9 +77,9 @@ class DatabaseHelper {
       '''
       CREATE TABLE product_price (
         id INTEGER PRIMARY KEY, 
-        price DECIMAL(9, 2),
-        piece INTEGER,
-        quantity DECIMAL(9, 2),
+        price DECIMAL,
+        piece DECIMAL,
+        quantity DECIMAL,
         calculate DECIMAL(9, 2),
         note TEXT
       )
@@ -95,7 +94,7 @@ class DatabaseHelper {
     final List<Map<String, Object?>> priceMaps = await db.query('product_price');
 
     return [
-      for (final {'id': id as int, 'price': price as int, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String}
+      for (final {'id': id as int, 'price': price as double, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String}
           in priceMaps)
         ProductPrice(id: id, price: price, piece: piece, quantity: quantity, note:note),
     ];
@@ -108,8 +107,8 @@ class DatabaseHelper {
 
     final List<Map<String, Object?>> priceMaps = await db.query('product_price');
 
-    for (final {'id': id as int, 'price': price as int, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String} in priceMaps) {
-        calVal = price / (piece * quantity);
+    for (final {'id': id as int, 'price': price as double, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String} in priceMaps) {
+        calVal = double.parse((price / (piece * quantity)).toStringAsFixed(2));
         item.add(ProductCal(id: id, price: price, piece: piece, quantity: quantity, calculate: calVal, note:note));
         _updateCalculate(id, calVal);
     }
@@ -131,25 +130,14 @@ class DatabaseHelper {
   Future<List<double>> bestPrice() async {
     final db = await database;
 
-    // await db.execute(
-    //   '''
-    //   SELECT *
-    //   FROM product_price
-    //   ORDER BY calculate DESC
-    //   LIMIT 3;
-    //   '''
-    // );
-
     final List<Map<String, dynamic>> results = await db.rawQuery(
       '''
         SELECT DISTINCT calculate
         FROM product_price 
-        ORDER BY calculate DESC 
+        ORDER BY calculate ASC
         LIMIT 3
       ''',
     );
-
-    // Extract the IDs into a list of integers
     return results.map((row) => row['calculate'] as double).toList();
   }
 
