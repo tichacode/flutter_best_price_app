@@ -1,5 +1,6 @@
 import 'screen_result.dart';
 import 'database_helper.dart';
+import 'extention.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 
@@ -89,6 +90,7 @@ class MainScreenState extends State<MainScreen> {
     // header
     elementList.add(
       Row(
+
         children: <Widget>[
           // header: price
           Expanded(
@@ -156,6 +158,20 @@ class MainScreenState extends State<MainScreen> {
           )
         ]
       )
+    );
+    
+    elementList.add(
+      // const Divider(
+      //   thickness: 0.5,
+      //   color: Colors.grey,
+      // )
+      const DashedDivider(
+        color: Colors.grey,
+        thickness: 0.5,
+        dashLength: 7,
+        dashSpace: 4,
+        height: 10,
+      ),
     );
 
     // list items
@@ -308,6 +324,15 @@ class _ItemList extends StatelessWidget {
       )
     );
 
+    dataRowList.add(
+      // Row(
+        const Divider(
+          thickness: 0.5,
+          color: Colors.grey,
+        )
+      // )
+    );
+
     return 
       SizedBox(
         width: double.maxFinite,
@@ -346,109 +371,160 @@ class _InputPriceState extends State<_InputPrice> {
     TextEditingController noteController = TextEditingController(text: widget.note ?? '');
 
     return Scaffold(
-      body: //Container()
-         Form(
-          key: _formKey,
-      child: Column(
-          mainAxisAlignment: .center,
-          children: <Widget>[
+      appBar: AppBar(title: const Text('Find Best Price!')),
+      body: Form(
+        key: _formKey,
+        child: 
+        Padding(
+          padding: EdgeInsets.all(20.0),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisAlignment: .center,
+              children: <Widget>[
+                // Price
+                Container(
+                  margin: const EdgeInsets.only(top:25, bottom: 15),
+                  child: Row(
+                    children: <Widget>[Expanded(child: Text("Price : "))]),
+                ),
+                TextFormField(
+                  controller: priceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Please write a name',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Enter valid data';
+                      } else if (double.parse(value) < 0) {
+                        return 'Price value must not less than 0';
+                      }
+                      return null;
+                  },
+                ),
 
-            // Price
-            TextFormField(
-              controller: priceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: 'Please write a name',
-              ),
-              validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Enter valid data';
-                  } else if (double.parse(value) < 0) {
-                    return 'Price value must not less than 0';
-                  }
-                  return null;
-              },
-            ),
-            
-            // Piece
-            TextFormField(
-              controller: pieceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: 'Please write a piece',
-              ),
-              // inputFormatters: <TextInputFormatter>[
-              //       FilteringTextInputFormatter.digitsOnly
-              //     ],
-              validator: (value) {
-                  if (value == null || value.isEmpty) {
-                      return 'Enter valid data';
-                  } else if (double.parse(value) < 0) {
-                    return 'Piece value must not less than 0';
-                  }
-                  return null;
-              },
-            ),
+                // Piece
+                Container(
+                  margin: const EdgeInsets.only(top:25, bottom: 15),
+                  child: Row(
+                    children: <Widget>[Expanded(child: Text("Piece : "))]),
+                ),
+                TextFormField(
+                  controller: pieceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Please write a piece',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  // inputFormatters: <TextInputFormatter>[
+                  //       FilteringTextInputFormatter.digitsOnly
+                  //     ],
+                  validator: (value) {
+                      if (value == null || value.isEmpty) {
+                          return 'Enter valid data';
+                      } else if (double.parse(value) < 0) {
+                        return 'Piece value must not less than 0';
+                      }
+                      return null;
+                  },
+                ),
 
-            // Quantity
-            TextFormField(
-              controller: quantityController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: 'Please write a quantity',
-              ),
-              // inputFormatters: <TextInputFormatter>[
-              //       FilteringTextInputFormatter.digitsOnly
-              //     ],
-              validator: (value) {
-                  if (value == null || value.isEmpty) {
-                      return 'Enter valid data';
-                  } else if (double.parse(value) < 0) {
-                    return 'Quantity value must not less than 0';
-                  }
-                  return null;
-              },
-            ),
+                // Quantity
+                Container(
+                  margin: const EdgeInsets.only(top:25, bottom: 15),
+                  child: Row(
+                    children: <Widget>[Expanded(child: Text("Quantity : "))]),
+                ),
+                TextFormField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Please write a quantity',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  // inputFormatters: <TextInputFormatter>[
+                  //       FilteringTextInputFormatter.digitsOnly
+                  //     ],
+                  validator: (value) {
+                      if (value == null || value.isEmpty) {
+                          return 'Enter valid data';
+                      } else if (double.parse(value) < 0) {
+                        return 'Quantity value must not less than 0';
+                      }
+                      return null;
+                  },
+                ),
 
-            // Note
-            TextFormField(
-              controller: noteController,
-              decoration: const InputDecoration(
-                hintText: 'Please write a note',
-              ),
-            ),
+                // Note
+                Container(
+                  margin: const EdgeInsets.only(top:25, bottom: 15),
+                  child: Row(
+                    children: <Widget>[Expanded(child: Text("Note : "))]),
+                ),
+                TextFormField(
+                  controller: noteController,
+                  decoration: InputDecoration(
+                    hintText: 'Please write a note',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
 
-            const SizedBox(height: 40.0),
-            TextButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  var priceData = ProductPrice(id: widget.id, price: double.parse(priceController.text), piece: double.parse(pieceController.text), quantity: double.parse(quantityController.text), note: noteController.text);
-                  if (widget.id == 0) {
-                    await MainScreenState.dbHelper.addPrice(priceData);
-                  } else {
-                    await MainScreenState.dbHelper.updatePrice(priceData);
-                  }
+                SizedBox(height: 40.0),
 
-                  widget._fetchItems();
+                TextButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      var priceData = ProductPrice(id: widget.id, price: double.parse(priceController.text), piece: double.parse(pieceController.text), quantity: double.parse(quantityController.text), note: noteController.text);
+                      if (widget.id == 0) {
+                        await MainScreenState.dbHelper.addPrice(priceData);
+                      } else {
+                        await MainScreenState.dbHelper.updatePrice(priceData);
+                      }
 
-                  if (context.mounted) {
+                      widget._fetchItems();
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    }
+                  },
+                  child: const Text('Save')
+                ),
+
+                const SizedBox(height: 40.0),
+                TextButton(
+                  onPressed: () {
                     Navigator.pop(context);
-                  }
-                }
-              },
-              child: const Text('Save')
-            ),
-
-            const SizedBox(height: 40.0),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('cancel'),
-            ),
-          ],
+                  },
+                  child: const Text('cancel'),
+                ),
+              ],
+            )
+          )
         )
-        )
+      )
     );
   }
 }
