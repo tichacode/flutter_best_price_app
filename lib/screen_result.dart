@@ -1,5 +1,6 @@
 import 'database_helper.dart';
 import 'extention.dart';
+import 'items_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -47,10 +48,11 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
   @override
   Widget build(BuildContext context) {
     List<Widget> elementList = [];
+    List<Widget> pinHeaderList = [];
     // Add and clear all button
     // elementList.add(const SizedBox(height: 20), );
 
-    elementList.add(
+    pinHeaderList.add(
       Row(
         // spacing: 20,
         children: <Widget>[
@@ -67,101 +69,10 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
       )
     );
 
-
     // header
-    elementList.add(
-      Row(
+    pinHeaderList.add(DataHeader(8, 23, 23, 23, 23, 0));
 
-        children: <Widget>[
-          // rank
-          Expanded(
-            flex: 8,
-            child: 
-              SizedBox(height: 10,),
-          ),
-
-          // header: price
-          Expanded(
-            flex: 23,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Price",
-                  ),
-                  WidgetSpan(
-                    child: Icon(Icons.monetization_on_rounded, size: 14),
-                  ),
-                ],
-              ),
-            )
-          ),
-
-          // header: piece
-          Expanded(
-            flex: 23,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Piece",
-                  ),
-                  WidgetSpan(
-                    child: Icon(Icons.question_mark, size: 14),
-                  ),
-                ],
-              ),
-            )
-          ),
-
-          // header: quantity
-          Expanded(
-            flex: 23,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Quantity",
-                  ),
-                  WidgetSpan(
-                    child: Icon(Icons.water_drop_rounded, size: 14),
-                  ),
-                ],
-              ),
-            )
-          ),
-
-
-          // header: price per quantity
-          Expanded(
-            flex: 23,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Price per unit",
-                  ),
-                  // WidgetSpan(
-                  //   child: Icon(Icons.water_drop_rounded, size: 14),
-                  // ),
-                ],
-              ),
-            )
-          ),
-
-        ]
-      )
-    );
-
-    elementList.add(
-      // const Divider(
-      //   thickness: 0.5,
-      //   color: Colors.grey,
-      // )
+    pinHeaderList.add(
       const DashedDivider(
         color: Colors.grey,
         thickness: 0.5,
@@ -177,13 +88,29 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
 
     return Padding(
       padding: EdgeInsets.all(20.0),
-      child: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 20.0,
-            children: elementList
-            )
+      child: 
+        CustomScrollView(
+          slivers: [
+            // This header stays locked at the top
+            PinnedHeaderSliver(
+              child: Container(
+                color: Colors.white,
+                alignment: Alignment.center,
+                child: Column(
+                  spacing: 20.0,
+                  children: pinHeaderList
+                  )
+              ),
+            ),
+
+            // The scrollable body content
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, i) => _ItemResultList(bestVal.indexOf(items[i].calculate), items[i].id, items[i].price, items[i].piece, items[i].quantity, items[i].calculate, items[i].note),
+                childCount: items.length,
+              ),
+            ),
+          ],
         )
     );
   }

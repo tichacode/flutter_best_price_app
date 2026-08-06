@@ -1,8 +1,9 @@
 import 'screen_result.dart';
+import 'screen_input.dart';
 import 'database_helper.dart';
 import 'extention.dart';
+import 'items_format.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
 
 
 class MainScreen extends StatefulWidget {
@@ -29,10 +30,10 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> elementList = [];
+    List<Widget> pinHeaderList = [];
 
     // Add and clear all button
-    elementList.add(
+    pinHeaderList.add(
       Row(
         spacing: 40,
         children: <Widget>[
@@ -45,7 +46,7 @@ class MainScreenState extends State<MainScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute<void>(
-                    builder: (context) => _InputPrice(0, 0, 1, 1, "", _fetchItems),
+                    builder: (context) => InputPrice(0, 0, 1, 1, "", _fetchItems),
                   ),
                 );
               },
@@ -86,85 +87,11 @@ class MainScreenState extends State<MainScreen> {
       )
     );
 
-
     // header
-    elementList.add(
-      Row(
+    pinHeaderList.add(DataHeader(0, 28, 28, 28, 0, 16));
 
-        children: <Widget>[
-          // header: price
-          Expanded(
-            flex: 28,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Price ",
-                  ),
-                  WidgetSpan(
-                    child: Icon(Icons.monetization_on_rounded, size: 14),
-                  ),
-                ],
-              ),
-            )
-          ),
-
-          // header: piece
-          Expanded(
-            flex: 28,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Piece ",
-                  ),
-                  WidgetSpan(
-                    child: Icon(Icons.question_mark, size: 14),
-                  ),
-                ],
-              ),
-            )
-          ),
-
-          // header: quantity
-          Expanded(
-            flex: 28,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Quantity ",
-                  ),
-                  WidgetSpan(
-                    child: Icon(Icons.water_drop_rounded, size: 14),
-                  ),
-                ],
-              ),
-            )
-          ),
-
-          // gap in header
-          Expanded(
-            flex: 16,
-            child: 
-            // ColoredBox(
-            //   color: Colors.blue,
-            //   child: 
-              SizedBox(height: 10,),
-            // )
-          )
-        ]
-      )
-    );
-    
-    elementList.add(
-      // const Divider(
-      //   thickness: 0.5,
-      //   color: Colors.grey,
-      // )
+    // divider
+    pinHeaderList.add(
       const DashedDivider(
         color: Colors.grey,
         thickness: 0.5,
@@ -174,19 +101,51 @@ class MainScreenState extends State<MainScreen> {
       ),
     );
 
-    // list items
-    if (items.isEmpty) {
-      elementList.add(const SizedBox(height: 20), );
-    } else {
-      for(var i = 0; i < items.length; i++){
-          elementList.add(_ItemList(items[i].id, items[i].price, items[i].piece, items[i].quantity, items[i].note, _fetchItems));
-      }
-    }
 
-    elementList.add(
+    return Scaffold(
+      appBar: AppBar(title: Text('Find Best Price!')),
+      body: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: CustomScrollView(
+          slivers: 
+          // elementList,
+          [
+            // This header stays locked at the top
+            PinnedHeaderSliver(
+              child: Container(
+                color: Colors.white,
+                alignment: Alignment.center,
+                child: Column(
+                  spacing: 20.0,
+                  children: pinHeaderList
+                  )
+              ),
+            ),
+            
+            items.isEmpty
+            ? const SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text('No data found', style: TextStyle(color: Colors.grey)),
+                  ),
+                ),
+              )
+
+            // The scrollable body content
+            : SliverList(
+              delegate: SliverChildBuilderDelegate(
+                  (context, i) => _ItemList(items[i].id, items[i].price, items[i].piece, items[i].quantity, items[i].note, _fetchItems),
+                  childCount: items.length,
+              ),
+            ),
+          ],
+        )
+      ),
+
       // Calculate button
-      ElevatedButton.icon(
-        label: const Text('Calculate!'),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, 
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           if (items.isEmpty) {
             showDialog(
@@ -210,20 +169,9 @@ class MainScreenState extends State<MainScreen> {
               ),
             );
           }
-        }
+        },
+        label: const Text('Calculate!')
       ),
-    );
-
-    return Padding(
-      padding: EdgeInsets.all(20.0),
-      child: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 20.0,
-            children: elementList
-            )
-        )
     );
   }
 }
@@ -241,6 +189,8 @@ class _ItemList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> dataRowList = [];
+
+    dataRowList.add(SizedBox(height: 10),);
 
     dataRowList.add(
       Row(
@@ -271,7 +221,7 @@ class _ItemList extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute<void>(
-                      builder: (context) => _InputPrice(id, price, piece, quantity, note, _fetchItems),
+                      builder: (context) => InputPrice(id, price, piece, quantity, note, _fetchItems),
                     ),
                   );
                 },
@@ -342,189 +292,5 @@ class _ItemList extends StatelessWidget {
           children: dataRowList
         )
       );
-  }
-}
-
-
-class _InputPrice extends StatefulWidget {
-  final int id;
-  final double price;
-  final double piece;
-  final double quantity;
-  final String? note;
-  final Future<void> Function() _fetchItems;
-
-  _InputPrice(this.id, this.price, this.piece, this.quantity, this.note, this._fetchItems);
-
-  @override
- _InputPriceState createState() => _InputPriceState();
-}
-
-class _InputPriceState extends State<_InputPrice> {
-  final _formKey = GlobalKey<FormState>();
-  
-  @override
-  Widget build(BuildContext context) {
-    TextEditingController priceController = TextEditingController(text: widget.price.toString());
-    TextEditingController pieceController = TextEditingController(text: widget.piece.toString());
-    TextEditingController quantityController = TextEditingController(text: widget.quantity.toString());
-    TextEditingController noteController = TextEditingController(text: widget.note ?? '');
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Find Best Price!')),
-      body: Form(
-        key: _formKey,
-        child: 
-        Padding(
-          padding: EdgeInsets.all(20.0),
-          child: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisAlignment: .center,
-              children: <Widget>[
-                // Price
-                Container(
-                  margin: const EdgeInsets.only(top:25, bottom: 15),
-                  child: Row(
-                    children: <Widget>[Expanded(child: Text("Price : "))]),
-                ),
-                TextFormField(
-                  controller: priceController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Please write a name',
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Enter valid data';
-                      } else if (double.parse(value) < 0) {
-                        return 'Price value must not less than 0';
-                      }
-                      return null;
-                  },
-                ),
-
-                // Piece
-                Container(
-                  margin: const EdgeInsets.only(top:25, bottom: 15),
-                  child: Row(
-                    children: <Widget>[Expanded(child: Text("Piece : "))]),
-                ),
-                TextFormField(
-                  controller: pieceController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Please write a piece',
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  // inputFormatters: <TextInputFormatter>[
-                  //       FilteringTextInputFormatter.digitsOnly
-                  //     ],
-                  validator: (value) {
-                      if (value == null || value.isEmpty) {
-                          return 'Enter valid data';
-                      } else if (double.parse(value) < 0) {
-                        return 'Piece value must not less than 0';
-                      }
-                      return null;
-                  },
-                ),
-
-                // Quantity
-                Container(
-                  margin: const EdgeInsets.only(top:25, bottom: 15),
-                  child: Row(
-                    children: <Widget>[Expanded(child: Text("Quantity : "))]),
-                ),
-                TextFormField(
-                  controller: quantityController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Please write a quantity',
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  // inputFormatters: <TextInputFormatter>[
-                  //       FilteringTextInputFormatter.digitsOnly
-                  //     ],
-                  validator: (value) {
-                      if (value == null || value.isEmpty) {
-                          return 'Enter valid data';
-                      } else if (double.parse(value) < 0) {
-                        return 'Quantity value must not less than 0';
-                      }
-                      return null;
-                  },
-                ),
-
-                // Note
-                Container(
-                  margin: const EdgeInsets.only(top:25, bottom: 15),
-                  child: Row(
-                    children: <Widget>[Expanded(child: Text("Note : "))]),
-                ),
-                TextFormField(
-                  controller: noteController,
-                  decoration: InputDecoration(
-                    hintText: 'Please write a note',
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 40.0),
-
-                TextButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      var priceData = ProductPrice(id: widget.id, price: double.parse(priceController.text), piece: double.parse(pieceController.text), quantity: double.parse(quantityController.text), note: noteController.text);
-                      if (widget.id == 0) {
-                        await MainScreenState.dbHelper.addPrice(priceData);
-                      } else {
-                        await MainScreenState.dbHelper.updatePrice(priceData);
-                      }
-
-                      widget._fetchItems();
-
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    }
-                  },
-                  child: const Text('Save')
-                ),
-
-                const SizedBox(height: 40.0),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('cancel'),
-                ),
-              ],
-            )
-          )
-        )
-      )
-    );
   }
 }
