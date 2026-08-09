@@ -138,7 +138,7 @@ class _ItemResultList extends StatelessWidget {
     dataRowList.add(
       Container(
       // padding: const EdgeInsets.symmetric(vertical: 26.0),
-      margin: const EdgeInsets.only(top:10, bottom: 15),
+      margin: const EdgeInsets.only(top:10.0, bottom: 15.0),
       child: 
         Row(
           children: <Widget>[

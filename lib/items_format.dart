@@ -14,6 +14,9 @@ class DataHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> headerList = [];
     double gap_height = 10;
+    final headerStyle = DefaultTextStyle.of(context).style.copyWith(
+      fontWeight: FontWeight.normal,
+    );
 
     // gap first
     if (flex_gap_first != 0) {
@@ -34,6 +37,7 @@ class DataHeader extends StatelessWidget {
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
+              style: headerStyle,
               children: [
                 TextSpan(
                   text: "Price",
@@ -56,6 +60,7 @@ class DataHeader extends StatelessWidget {
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
+              style: headerStyle,
               children: [
                 TextSpan(
                   text: "Piece",
@@ -78,6 +83,7 @@ class DataHeader extends StatelessWidget {
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
+              style: headerStyle,
               children: [
                 TextSpan(
                   text: "Quantity",
@@ -100,6 +106,7 @@ class DataHeader extends StatelessWidget {
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
+              style: headerStyle,
               children: [
                 TextSpan(
                   text: "Price per unit",

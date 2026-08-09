@@ -67,8 +67,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       pathDb,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -77,14 +78,21 @@ class DatabaseHelper {
       '''
       CREATE TABLE product_price (
         id INTEGER PRIMARY KEY, 
-        price DECIMAL,
-        piece DECIMAL,
-        quantity DECIMAL,
-        calculate DECIMAL(9, 2),
+        price REAL,
+        piece REAL,
+        quantity REAL,
+        calculate REAL,
         note TEXT
       )
       '''
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('DROP TABLE IF EXISTS product_price');
+      await _onCreate(db, newVersion);
+    }
   }
 
 
@@ -93,11 +101,15 @@ class DatabaseHelper {
 
     final List<Map<String, Object?>> priceMaps = await db.query('product_price');
 
-    return [
-      for (final {'id': id as int, 'price': price as double, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String}
-          in priceMaps)
-        ProductPrice(id: id, price: price, piece: piece, quantity: quantity, note:note),
-    ];
+    return priceMaps.map((row) {
+      return ProductPrice(
+        id: row['id'] as int,
+        price: (row['price'] as num).toDouble(),
+        piece: (row['piece'] as num).toDouble(),
+        quantity: (row['quantity'] as num).toDouble(),
+        note: (row['note'] as String?) ?? '',
+      );
+    }).toList();
   }
 
   Future<List<ProductCal>> calculatePrice() async {
@@ -107,10 +119,16 @@ class DatabaseHelper {
 
     final List<Map<String, Object?>> priceMaps = await db.query('product_price');
 
-    for (final {'id': id as int, 'price': price as double, 'piece': piece as double, 'quantity': quantity as double, 'note': note as String} in priceMaps) {
-        calVal = double.parse((price / (piece * quantity)).toStringAsFixed(2));
-        item.add(ProductCal(id: id, price: price, piece: piece, quantity: quantity, calculate: calVal, note:note));
-        _updateCalculate(id, calVal);
+    for (final row in priceMaps) {
+      final id = row['id'] as int;
+      final price = (row['price'] as num).toDouble();
+      final piece = (row['piece'] as num).toDouble();
+      final quantity = (row['quantity'] as num).toDouble();
+      final note = (row['note'] as String?) ?? '';
+
+      calVal = double.parse((price / (piece * quantity)).toStringAsFixed(2));
+      item.add(ProductCal(id: id, price: price, piece: piece, quantity: quantity, calculate: calVal, note: note));
+      _updateCalculate(id, calVal);
     }
 
     return item;
@@ -134,11 +152,12 @@ class DatabaseHelper {
       '''
         SELECT DISTINCT calculate
         FROM product_price 
+        WHERE calculate IS NOT NULL
         ORDER BY calculate ASC
         LIMIT 3
       ''',
     );
-    return results.map((row) => row['calculate'] as double).toList();
+    return results.map((row) => (row['calculate'] as num).toDouble()).toList();
   }
 
 
