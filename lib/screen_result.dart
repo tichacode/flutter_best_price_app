@@ -94,7 +94,7 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
             // This header stays locked at the top
             PinnedHeaderSliver(
               child: Container(
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 alignment: Alignment.center,
                 child: Column(
                   spacing: 20.0,
@@ -130,9 +130,49 @@ class _ItemResultList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> dataRowList = [];
+    List<Widget> dataRowRank = [];
     String rankStr = "";
     if (rank != -1) {
       rankStr = (rank + 1).toString();
+    }
+
+    if (rank != -1 && rank < 3) {
+      Color rankColor = Colors.orange;
+      if (rank == 1) {
+        rankColor = Colors.grey;
+      } else if (rank == 2) {
+        rankColor = const Color.fromARGB(255, 133, 67, 6);
+      }
+      dataRowRank.add(
+        Expanded(
+          flex: 8,
+          child:
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: DefaultTextStyle.of(context).style.copyWith(
+                fontWeight: FontWeight.normal,
+              ),
+              children: [
+                WidgetSpan(
+                  child: Image.asset("icon_crown.png", color: rankColor,),
+                ),
+                TextSpan(
+                  text: rankStr,
+                ),
+              ],
+            ),
+          )
+        ),
+      );
+    } else {
+      dataRowRank.add(
+        Expanded(
+          flex: 8,
+          child:
+            Text(rankStr, textAlign: TextAlign.center)
+        ),
+      );
     }
 
     dataRowList.add(
@@ -141,16 +181,16 @@ class _ItemResultList extends StatelessWidget {
       margin: const EdgeInsets.only(top:10.0, bottom: 15.0),
       child: 
         Row(
-          children: <Widget>[
+          children: dataRowRank + <Widget>[
             // Expanded(
             //   child: Text(id.toString(), textAlign: TextAlign.center),
             // ),
 
-            Expanded(
-              flex: 8,
-              child:
-                Text(rankStr, textAlign: TextAlign.center)
-            ),
+            // Expanded(
+            //   flex: 8,
+            //   child:
+            //     Text(rankStr, textAlign: TextAlign.center)
+            // ),
 
             Expanded(
               flex: 23,
@@ -178,8 +218,13 @@ class _ItemResultList extends StatelessWidget {
       Row(
         children: <Widget>[
           Expanded(
+            flex: 8,
+            child: SizedBox(height: 10)
+          ),
+
+          Expanded(
             flex: 92,
-            child: Text('Note: $note', textAlign: TextAlign.left, style: TextStyle(color: Color.fromARGB(255, 95, 95, 95)),),
+            child: Text('Note: $note', textAlign: TextAlign.left, style: TextStyle(color: Color.fromARGB(255, 95, 95, 95)),), //Color.fromARGB(255, 95, 95, 95)
           )
         ]
       )

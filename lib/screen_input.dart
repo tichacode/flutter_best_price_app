@@ -152,7 +152,7 @@ class _InputPriceState extends State<InputPrice> {
 
                   SizedBox(height: 40.0),
 
-                  TextButton(
+                  FloatingActionButton.extended(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         var priceData = ProductPrice(id: widget.id, price: double.parse(priceController.text), piece: double.parse(pieceController.text), quantity: double.parse(quantityController.text), note: noteController.text);
@@ -169,7 +169,7 @@ class _InputPriceState extends State<InputPrice> {
                         }
                       }
                     },
-                    child: const Text('Save')
+                    label: const Text('Save')
                   ),
 
                   const SizedBox(height: 40.0),
@@ -177,7 +177,7 @@ class _InputPriceState extends State<InputPrice> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('cancel'),
+                    child: const Text('Cancel'),
                   ),
                 ],
               )

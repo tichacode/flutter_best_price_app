@@ -113,7 +113,7 @@ class MainScreenState extends State<MainScreen> {
             // This header stays locked at the top
             PinnedHeaderSliver(
               child: Container(
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 alignment: Alignment.center,
                 child: Column(
                   spacing: 20.0,
