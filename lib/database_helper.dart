@@ -5,6 +5,23 @@ import 'package:flutter/foundation.dart'; // for kIsWeb
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart'; // for databaseFactoryFfiWeb
 import 'package:path_provider/path_provider.dart';
 
+// ---------- collect global vars ----------
+final String TITLE_NAME = "BEST PRICE";
+final Text TITLE_TEXT = Text(TITLE_NAME, style: TextStyle(fontSize: 20,));
+
+// ---------- class data ----------
+
+class PackPrice {
+  final int id;
+  final String name;
+
+  PackPrice({required this.id, required this.name});
+
+  Map<String, Object?> toMap() {
+    return {'id': id, 'name': name};
+  }
+}
+
 class ProductPrice {
   final int id;
   final double price;
@@ -35,6 +52,7 @@ class ProductCal {
   ProductCal({required this.id, required this.price, required this.piece, required this.quantity, required this.calculate, required this.note});
 }
 
+// ---------- init database ----------
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -67,13 +85,22 @@ class DatabaseHelper {
 
     return await openDatabase(
       pathDb,
-      version: 2,
+      version: 1,
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
+      // onUpgrade: _onUpgrade,
     );
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    await db.execute(
+      '''
+      CREATE TABLE pack_price (
+        id INTEGER PRIMARY KEY, 
+        name TEXT
+      )
+      '''
+    );
+
     await db.execute(
       '''
       CREATE TABLE product_price (
@@ -82,24 +109,97 @@ class DatabaseHelper {
         piece REAL,
         quantity REAL,
         calculate REAL,
-        note TEXT
+        note TEXT,
+        pack_id INT REFERENCES pack_price(id)
       )
       '''
     );
+
   }
 
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute('DROP TABLE IF EXISTS product_price');
-      await _onCreate(db, newVersion);
-    }
-  }
+  // Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  //   if (oldVersion < 3) {
+  //     await db.execute('DROP TABLE IF EXISTS product_price');
+  //     await _onCreate(db, newVersion);
+  //   }
+  // }
 
 
-  Future<List<ProductPrice>> fetchPrice() async {
+// ---------- pack_price ----------
+
+  Future<List<PackPrice>> fetchPack() async {
     final db = await database;
 
-    final List<Map<String, Object?>> priceMaps = await db.query('product_price');
+    final List<Map<String, Object?>> packMaps = await db.query('pack_price');
+
+    return packMaps.map((row) {
+      return PackPrice(
+        id: row['id'] as int,
+        name: (row['name'] as String?) ?? '',
+      );
+    }).toList();
+  }
+
+  Future<PackPrice?> fetchPackById(int id) async {
+    final db = await database;
+ 
+    final List<Map<String, Object?>> packMaps = await db.query(
+      'pack_price',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+ 
+    if (packMaps.isEmpty) return null;
+ 
+    final row = packMaps.first;
+    return PackPrice(
+      id: row['id'] as int,
+      name: (row['name'] as String?) ?? '',
+    );
+  }
+
+  Future<int> addPack(PackPrice packPrice) async {
+    final db = await database;
+
+    return await db.insert("pack_price", {
+      "name": packPrice.name
+    });
+  }
+
+  Future<int> updatePack(PackPrice packPrice) async {
+    final db = await database;
+
+    return await db.update(
+      'pack_price',
+      packPrice.toMap(),
+      where: 'id = ?',
+      whereArgs: [packPrice.id],
+    );
+  }
+
+  Future<int> deletePack(int id) async {
+    final db = await database;
+
+    return await db.delete(
+      'pack_price',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+// ---------- product_price ----------
+
+  Future<List<ProductPrice>> fetchPrice(int pack_id) async {
+    final db = await database;
+
+    final List<Map<String, Object?>> priceMaps = await db.query(
+      'product_price',
+      columns: ['id', 'price', 'piece', 'quantity', 'note'],
+      where: 'pack_id = ?',
+      whereArgs: [pack_id],
+      );
 
     return priceMaps.map((row) {
       return ProductPrice(
@@ -112,12 +212,17 @@ class DatabaseHelper {
     }).toList();
   }
 
-  Future<List<ProductCal>> calculatePrice() async {
+  Future<List<ProductCal>> calculatePrice(int pack_id) async {
     final db = await database;
     List<ProductCal> item = [];
     double calVal;
 
-    final List<Map<String, Object?>> priceMaps = await db.query('product_price');
+    final List<Map<String, Object?>> priceMaps = await db.query(
+      'product_price',
+      columns: ['id', 'price', 'piece', 'quantity', 'note'],
+      where: 'pack_id = ?',
+      whereArgs: [pack_id],
+      );
 
     for (final row in priceMaps) {
       final id = row['id'] as int;
@@ -145,7 +250,7 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<double>> bestPrice() async {
+  Future<List<double>> bestPrice(int pack_id) async {
     final db = await database;
 
     final List<Map<String, dynamic>> results = await db.rawQuery(
@@ -153,22 +258,25 @@ class DatabaseHelper {
         SELECT DISTINCT calculate
         FROM product_price 
         WHERE calculate IS NOT NULL
+          AND pack_id = ?
         ORDER BY calculate ASC
         LIMIT 3
-      ''',
+      ''', 
+      [pack_id]
     );
     return results.map((row) => (row['calculate'] as num).toDouble()).toList();
   }
 
 
-  Future<int> addPrice(ProductPrice productPrice) async {
+  Future<int> addPrice(ProductPrice productPrice, int pack_id) async {
     final db = await database;
 
     return await db.insert("product_price", {
       "price": productPrice.price,
       "piece": productPrice.piece,
       "quantity": productPrice.quantity,
-      "note": productPrice.note
+      "note": productPrice.note,
+      "pack_id": pack_id
     });
   }
 
@@ -195,9 +303,9 @@ class DatabaseHelper {
   }
 
 
-  Future<int> deleteAllPrice() async {
+  Future<int> deleteAllPrice(int pack_id) async {
     final db = await database;
 
-    return await db.rawDelete("DELETE FROM product_price");
+    return await db.rawDelete("DELETE FROM product_price WHERE pack_id = ?", [pack_id]);
   }
 }

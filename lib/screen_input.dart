@@ -1,16 +1,17 @@
-import 'screen_main.dart';
+import 'screen_main_drawer.dart';
 import 'database_helper.dart';
 import 'package:flutter/material.dart';
 
 class InputPrice extends StatefulWidget {
   final int id;
+  final int pack_id;
   final double price;
   final double piece;
   final double quantity;
   final String? note;
   final Future<void> Function() _fetchItems;
 
-  InputPrice(this.id, this.price, this.piece, this.quantity, this.note, this._fetchItems);
+  InputPrice(this.id, this.pack_id, this.price, this.piece, this.quantity, this.note, this._fetchItems);
 
   @override
  _InputPriceState createState() => _InputPriceState();
@@ -27,7 +28,7 @@ class _InputPriceState extends State<InputPrice> {
     TextEditingController noteController = TextEditingController(text: widget.note ?? '');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Find Best Price!')),
+      appBar: AppBar(title: TITLE_TEXT),
       resizeToAvoidBottomInset: true,
       body: 
       SingleChildScrollView(
@@ -157,7 +158,7 @@ class _InputPriceState extends State<InputPrice> {
                       if (_formKey.currentState!.validate()) {
                         var priceData = ProductPrice(id: widget.id, price: double.parse(priceController.text), piece: double.parse(pieceController.text), quantity: double.parse(quantityController.text), note: noteController.text);
                         if (widget.id == 0) {
-                          await MainScreenState.dbHelper.addPrice(priceData);
+                          await MainScreenState.dbHelper.addPrice(priceData, widget.pack_id);
                         } else {
                           await MainScreenState.dbHelper.updatePrice(priceData);
                         }
@@ -167,6 +168,105 @@ class _InputPriceState extends State<InputPrice> {
                         if (context.mounted) {
                           Navigator.pop(context);
                         }
+                      }
+                    },
+                    label: const Text('Save')
+                  ),
+
+                  const SizedBox(height: 40.0),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                ],
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+}
+
+
+
+class InputPack extends StatefulWidget {
+  final int id;
+  final String? name;
+  final Future<void> Function(String) _onPackModifyTapped;
+  final Future<void> Function()? _refreshPack;
+
+  InputPack(this.id, this.name, this._onPackModifyTapped, this._refreshPack); //, this._fetchItems
+
+  @override
+  _InputPackState createState() => _InputPackState();
+}
+
+class _InputPackState extends State<InputPack> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    TextEditingController nameController = TextEditingController(text: widget.name ?? '');
+
+    return Scaffold(
+      appBar: AppBar(title: TITLE_TEXT),
+      resizeToAvoidBottomInset: true,
+      body: 
+      SingleChildScrollView(
+        child: Padding(
+        // padding: EdgeInsets.only(right:20.0, left: 20.0, top:20.0, bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.all(20.0),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: Form(
+              key: _formKey,
+              child:  Column(
+                mainAxisAlignment: .center,
+                children: <Widget>[
+                  // Note
+                  Container(
+                    margin: const EdgeInsets.only(top:25.0, bottom: 15.0),
+                    child: Row(
+                      children: <Widget>[Expanded(child: Text("Note name : "))]),
+                  ),
+                  TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      hintText: 'Note price',
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 40.0),
+
+                  FloatingActionButton.extended(
+                    onPressed: () async {
+                      if (nameController.text == "") {
+                        nameController.text = "Note price";
+                      }
+                      
+                      var packData = PackPrice(id: widget.id, name: nameController.text);
+                      
+                      if (widget.id == 0) {
+                        await MainScreenState.dbHelper.addPack(packData);
+                        widget._onPackModifyTapped("Create");
+                      } else {
+                        await MainScreenState.dbHelper.updatePack(packData);
+                        widget._onPackModifyTapped("Update");
+                      }
+
+                      widget._refreshPack?.call();
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
                       }
                     },
                     label: const Text('Save')
