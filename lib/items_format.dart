@@ -1,4 +1,82 @@
+import 'screen_main_drawer.dart';
+// import 'database_helper.dart' show DatabaseHelper;
+import 'screen_input.dart';
 import 'package:flutter/material.dart';
+
+class PackHeader extends StatelessWidget {
+  final int pack_id;
+  final String pack_name;
+  final Future<void> Function()? _refreshPack;
+  final Future<void> Function(String) _onPackModifyTapped;
+  final Future<void> Function() _deletePack;
+
+  const PackHeader(this.pack_id, this.pack_name, this._refreshPack, this._onPackModifyTapped, this._deletePack);
+
+   @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 84,
+          child: Text(pack_name, style: TextStyle(fontSize: 25)),
+        ),
+
+        Expanded(
+          flex: 8,
+          child:
+            // Edit button
+            IconButton (
+              icon: const Icon(Icons.edit, color: Colors.grey,),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => InputPack(pack_id, pack_name, _onPackModifyTapped, _refreshPack),
+                  ),
+                );
+              },
+            ),
+        ),
+
+        Expanded(
+          flex: 8,
+          child: 
+            // Delete button
+            IconButton (
+              icon: const Icon(Icons.delete, color: Colors.grey,),
+              onPressed: () => showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: const Text('Delete this note ?'),
+                  content: const Text('all of data in this note will disappear.'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await _deletePack();
+                        await _onPackModifyTapped("Delete");
+                        if (context.mounted) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (context) => const MainScreenDrawer(),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Yes'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        )
+      ]
+    );
+  }
+}
 
 class DataHeader extends StatelessWidget {
   final int flex_gap_first;

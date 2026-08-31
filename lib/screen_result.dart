@@ -6,19 +6,33 @@ import 'package:flutter/services.dart';
 
 
 class ResultScreen extends StatelessWidget {
-  const ResultScreen();
+  final int pack_id;
+  final String pack_name;
+  final Future<void> Function() fetchItemsPack;
+  final Future<void> Function(String) onPackModifyTapped;
+  final Future<void> Function() deletePack;
+
+  const ResultScreen(this.pack_id, this.pack_name, this.fetchItemsPack, this.onPackModifyTapped, this.deletePack);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Find Best Price!')),
-      body: CalculateResultScreen()
+      appBar: AppBar(title: TITLE_TEXT),
+      body: CalculateResultScreen(pack_id, pack_name, fetchItemsPack, onPackModifyTapped, deletePack)
     );
   }
 }
 
 
 class CalculateResultScreen extends StatefulWidget {
+  final int pack_id;
+  final String pack_name;
+  final Future<void> Function() fetchItemsPack;
+  final Future<void> Function(String) onPackModifyTapped;
+  final Future<void> Function() deletePack;
+
+  const CalculateResultScreen(this.pack_id, this.pack_name, this.fetchItemsPack, this.onPackModifyTapped, this.deletePack);
+
   @override
   _CalculateResulScreenState createState() => _CalculateResulScreenState();
 }
@@ -28,21 +42,33 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
   static final dbHelper = DatabaseHelper();
   List<ProductCal> items = [];
   List<double> bestVal = [];
+  late String packName;
 
   @override
   void initState() {
     super.initState();
+    packName = widget.pack_name;
     _calAndFetchItems();
   }
 
   Future<void> _calAndFetchItems() async {
-    //test: dbHelper.addPrice(ProductPrice(id: 0, price: 0, piece: 1, quantity: 1, note: "test"));
-    final data = await dbHelper.calculatePrice();
-    final bestList = await dbHelper.bestPrice();
+    final data = await dbHelper.calculatePrice(widget.pack_id);
+    final bestList = await dbHelper.bestPrice(widget.pack_id);
     setState(() {
       items = data;
       bestVal = bestList;
     });
+  }
+
+  Future<void> _refreshPack() async {
+    await widget.fetchItemsPack();
+
+    final pack = await dbHelper.fetchPackById(widget.pack_id);
+    if (pack != null && mounted) {
+      setState(() {
+        packName = pack.name;
+      });
+    }
   }
 
   @override
@@ -51,6 +77,10 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
     List<Widget> pinHeaderList = [];
     // Add and clear all button
     // elementList.add(const SizedBox(height: 20), );
+
+    pinHeaderList.add(
+      PackHeader(widget.pack_id, packName, _refreshPack, widget.onPackModifyTapped, widget.deletePack)
+    );
 
     pinHeaderList.add(
       Row(
@@ -154,11 +184,11 @@ class _ItemResultList extends StatelessWidget {
                 fontWeight: FontWeight.normal,
               ),
               children: [
-                WidgetSpan(
-                  child: Image.asset("icon_crown.png", color: rankColor,),
-                ),
                 TextSpan(
                   text: rankStr,
+                ),
+                WidgetSpan(
+                  child: Image.asset("icon_crown.png", color: rankColor,),
                 ),
               ],
             ),
