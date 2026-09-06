@@ -37,7 +37,6 @@ class CalculateResultScreen extends StatefulWidget {
   _CalculateResulScreenState createState() => _CalculateResulScreenState();
 }
 
-
 class _CalculateResulScreenState extends State<CalculateResultScreen> {
   static final dbHelper = DatabaseHelper();
   List<ProductCal> items = [];
@@ -75,8 +74,6 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
   Widget build(BuildContext context) {
     List<Widget> elementList = [];
     List<Widget> pinHeaderList = [];
-    // Add and clear all button
-    // elementList.add(const SizedBox(height: 20), );
 
     pinHeaderList.add(
       PackHeader(widget.pack_id, packName, _refreshPack, widget.onPackModifyTapped, widget.deletePack)
@@ -84,9 +81,8 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
 
     pinHeaderList.add(
       Row(
-        // spacing: 20,
         children: <Widget>[
-          // Add button
+          // Back
           Expanded(
             child: ElevatedButton(
               onPressed: () {
@@ -102,6 +98,7 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
     // header
     pinHeaderList.add(DataHeader(8, 23, 23, 23, 23, 0));
 
+    // dash divider
     pinHeaderList.add(
       const DashedDivider(
         color: Colors.grey,
@@ -112,6 +109,7 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
       ),
     );
 
+    // items
     for(var i = 0; i < items.length; i++){
       elementList.add(_ItemResultList(bestVal.indexOf(items[i].calculate), items[i].id, items[i].price, items[i].piece, items[i].quantity, items[i].calculate, items[i].note));
     }
@@ -121,7 +119,7 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
       child: 
         CustomScrollView(
           slivers: [
-            // This header stays locked at the top
+            // header locked at the top
             PinnedHeaderSliver(
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -133,7 +131,7 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
               ),
             ),
 
-            // The scrollable body content
+            // scrollable body content
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, i) => _ItemResultList(bestVal.indexOf(items[i].calculate), items[i].id, items[i].price, items[i].piece, items[i].quantity, items[i].calculate, items[i].note),
@@ -161,11 +159,12 @@ class _ItemResultList extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> dataRowList = [];
     List<Widget> dataRowRank = [];
+    
+    // rank
     String rankStr = "";
     if (rank != -1) {
       rankStr = (rank + 1).toString();
     }
-
     if (rank != -1 && rank < 3) {
       Color rankColor = Colors.orange;
       if (rank == 1) {
@@ -205,23 +204,13 @@ class _ItemResultList extends StatelessWidget {
       );
     }
 
+    // price data
     dataRowList.add(
       Container(
-      // padding: const EdgeInsets.symmetric(vertical: 26.0),
       margin: const EdgeInsets.only(top:10.0, bottom: 15.0),
       child: 
         Row(
           children: dataRowRank + <Widget>[
-            // Expanded(
-            //   child: Text(id.toString(), textAlign: TextAlign.center),
-            // ),
-
-            // Expanded(
-            //   flex: 8,
-            //   child:
-            //     Text(rankStr, textAlign: TextAlign.center)
-            // ),
-
             Expanded(
               flex: 23,
               child: Text(price.toString(), textAlign: TextAlign.center),
@@ -238,12 +227,12 @@ class _ItemResultList extends StatelessWidget {
               flex: 23,
               child: Text(calculateVal.toString(), textAlign: TextAlign.center),
             ),
-            
           ]
         )
       )
     );
 
+    // note
     dataRowList.add(
       Row(
         children: <Widget>[
@@ -260,6 +249,7 @@ class _ItemResultList extends StatelessWidget {
       )
     );
 
+    // divider
     dataRowList.add(
         const Divider(
           thickness: 0.5,
@@ -271,12 +261,8 @@ class _ItemResultList extends StatelessWidget {
       SizedBox(
         width: double.maxFinite,
         child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          // spacing: 20.0,
           children: dataRowList
         )
       );
-
-    
   }
 }

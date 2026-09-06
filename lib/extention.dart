@@ -1,4 +1,5 @@
 // https://medium.com/@valerii.novykov/how-to-create-custom-dashed-and-dotted-dividers-in-flutter-a3cbe637fb86
+// extension: dash and dotted dividers
 
 import 'package:flutter/material.dart';
 

@@ -7,7 +7,8 @@ import 'package:path_provider/path_provider.dart';
 
 // ---------- collect global vars ----------
 final String TITLE_NAME = "BEST PRICE";
-final Text TITLE_TEXT = Text(TITLE_NAME, style: TextStyle(fontSize: 20,));
+final Text TITLE_TEXT = Text(TITLE_NAME, style: TextStyle(fontSize: 20));
+
 
 // ---------- class data ----------
 
@@ -52,6 +53,7 @@ class ProductCal {
   ProductCal({required this.id, required this.price, required this.piece, required this.quantity, required this.calculate, required this.note});
 }
 
+
 // ---------- init database ----------
 
 class DatabaseHelper {
@@ -72,7 +74,6 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     String pathDb;
-    WidgetsFlutterBinding.ensureInitialized();
 
     if (kIsWeb) {
       databaseFactoryOrNull = databaseFactoryFfiWeb;
@@ -86,9 +87,14 @@ class DatabaseHelper {
     return await openDatabase(
       pathDb,
       version: 1,
+      onConfigure: _onConfigure,
       onCreate: _onCreate,
       // onUpgrade: _onUpgrade,
     );
+  }
+
+  Future<void> _onConfigure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -110,7 +116,7 @@ class DatabaseHelper {
         quantity REAL,
         calculate REAL,
         note TEXT,
-        pack_id INT REFERENCES pack_price(id)
+        pack_id INT REFERENCES pack_price(id) ON DELETE CASCADE
       )
       '''
     );
@@ -118,8 +124,9 @@ class DatabaseHelper {
   }
 
   // Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-  //   if (oldVersion < 3) {
+  //   if (oldVersion < 2) {
   //     await db.execute('DROP TABLE IF EXISTS product_price');
+  //     await db.execute('DROP TABLE IF EXISTS pack_price'); 
   //     await _onCreate(db, newVersion);
   //   }
   // }
@@ -178,15 +185,15 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> deletePack(int id) async {
-    final db = await database;
+  // Future<int> deletePack(int id) async {
+  //   final db = await database;
 
-    return await db.delete(
-      'pack_price',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
+  //   return await db.delete(
+  //     'pack_price',
+  //     where: 'id = ?',
+  //     whereArgs: [id],
+  //   );
+  // }
 
 
 // ---------- product_price ----------
@@ -231,9 +238,13 @@ class DatabaseHelper {
       final quantity = (row['quantity'] as num).toDouble();
       final note = (row['note'] as String?) ?? '';
 
-      calVal = double.parse((price / (piece * quantity)).toStringAsFixed(2));
+      if (price == 0) {
+        calVal = 0;
+      } else {
+        calVal = double.parse((price / (piece * quantity)).toStringAsFixed(2));
+      }
       item.add(ProductCal(id: id, price: price, piece: piece, quantity: quantity, calculate: calVal, note: note));
-      _updateCalculate(id, calVal);
+      await _updateCalculate(id, calVal);
     }
 
     return item;
@@ -302,10 +313,29 @@ class DatabaseHelper {
     );
   }
 
-
   Future<int> deleteAllPrice(int pack_id) async {
     final db = await database;
 
     return await db.rawDelete("DELETE FROM product_price WHERE pack_id = ?", [pack_id]);
+  }
+
+
+  // ---------- combined operations ----------
+
+  Future<void> deletePackWithPrices(int packId) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      await txn.delete(
+        'product_price',
+        where: 'pack_id = ?',
+        whereArgs: [packId],
+      );
+      await txn.delete(
+        'pack_price',
+        where: 'id = ?',
+        whereArgs: [packId],
+      );
+    });
   }
 }
