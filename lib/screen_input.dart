@@ -19,13 +19,26 @@ class InputPrice extends StatefulWidget {
 
 class _InputPriceState extends State<InputPrice> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController priceController = TextEditingController();
+  TextEditingController pieceController = TextEditingController();
+  TextEditingController quantityController = TextEditingController();
+  TextEditingController noteController = TextEditingController();
+
+  @override
+  void dispose() {
+    priceController.dispose();
+    pieceController.dispose();
+    quantityController.dispose();
+    noteController.dispose();
+    super.dispose();
+  }
   
   @override
   Widget build(BuildContext context) {
-    TextEditingController priceController = TextEditingController(text: widget.price.toString());
-    TextEditingController pieceController = TextEditingController(text: widget.piece.toString());
-    TextEditingController quantityController = TextEditingController(text: widget.quantity.toString());
-    TextEditingController noteController = TextEditingController(text: widget.note ?? '');
+    priceController.text = widget.price.toString();
+    pieceController.text = widget.piece.toString();
+    quantityController.text = widget.quantity.toString();
+    noteController.text = widget.note ?? '';
 
     return Scaffold(
       appBar: AppBar(title: TITLE_TEXT),
@@ -33,7 +46,6 @@ class _InputPriceState extends State<InputPrice> {
       body: 
       SingleChildScrollView(
         child: Padding(
-        // padding: EdgeInsets.only(right:20.0, left: 20.0, top:20.0, bottom: MediaQuery.of(context).viewInsets.bottom),
           padding: EdgeInsets.all(20.0),
           child: SizedBox(
             width: double.maxFinite,
@@ -42,6 +54,7 @@ class _InputPriceState extends State<InputPrice> {
               child:  Column(
                 mainAxisAlignment: .center,
                 children: <Widget>[
+                  
                   // Price
                   Container(
                     margin: const EdgeInsets.only(top:25.0, bottom: 15.0),
@@ -61,7 +74,7 @@ class _InputPriceState extends State<InputPrice> {
                       ),
                     ),
                     validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.isEmpty || num.tryParse(value) == null) {
                           return 'Enter valid data';
                         } else if (double.parse(value) < 0) {
                           return 'Price value must not less than 0';
@@ -88,11 +101,8 @@ class _InputPriceState extends State<InputPrice> {
                         borderRadius: BorderRadius.circular(15),
                       ),
                     ),
-                    // inputFormatters: <TextInputFormatter>[
-                    //       FilteringTextInputFormatter.digitsOnly
-                    //     ],
                     validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.isEmpty || num.tryParse(value) == null) {
                             return 'Enter valid data';
                         } else if (double.parse(value) < 0) {
                           return 'Piece value must not less than 0';
@@ -119,11 +129,8 @@ class _InputPriceState extends State<InputPrice> {
                         borderRadius: BorderRadius.circular(15),
                       ),
                     ),
-                    // inputFormatters: <TextInputFormatter>[
-                    //       FilteringTextInputFormatter.digitsOnly
-                    //     ],
                     validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.isEmpty || num.tryParse(value) == null) {
                             return 'Enter valid data';
                         } else if (double.parse(value) < 0) {
                           return 'Quantity value must not less than 0';
@@ -152,7 +159,8 @@ class _InputPriceState extends State<InputPrice> {
                   ),
 
                   SizedBox(height: 40.0),
-
+                  
+                  // Save
                   FloatingActionButton.extended(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
@@ -174,6 +182,8 @@ class _InputPriceState extends State<InputPrice> {
                   ),
 
                   const SizedBox(height: 40.0),
+
+                  // Cancel
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -191,7 +201,6 @@ class _InputPriceState extends State<InputPrice> {
 }
 
 
-
 class InputPack extends StatefulWidget {
   final int id;
   final String? name;
@@ -206,10 +215,17 @@ class InputPack extends StatefulWidget {
 
 class _InputPackState extends State<InputPack> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController nameController = TextEditingController();
+  
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController nameController = TextEditingController(text: widget.name ?? '');
+    nameController.text = widget.name ?? '';
 
     return Scaffold(
       appBar: AppBar(title: TITLE_TEXT),
@@ -217,7 +233,6 @@ class _InputPackState extends State<InputPack> {
       body: 
       SingleChildScrollView(
         child: Padding(
-        // padding: EdgeInsets.only(right:20.0, left: 20.0, top:20.0, bottom: MediaQuery.of(context).viewInsets.bottom),
           padding: EdgeInsets.all(20.0),
           child: SizedBox(
             width: double.maxFinite,
@@ -226,7 +241,8 @@ class _InputPackState extends State<InputPack> {
               child:  Column(
                 mainAxisAlignment: .center,
                 children: <Widget>[
-                  // Note
+
+                  // Name
                   Container(
                     margin: const EdgeInsets.only(top:25.0, bottom: 15.0),
                     child: Row(
@@ -247,6 +263,7 @@ class _InputPackState extends State<InputPack> {
 
                   SizedBox(height: 40.0),
 
+                  // Save
                   FloatingActionButton.extended(
                     onPressed: () async {
                       if (nameController.text == "") {
@@ -272,6 +289,7 @@ class _InputPackState extends State<InputPack> {
                     label: const Text('Save')
                   ),
 
+                  // Cancel
                   const SizedBox(height: 40.0),
                   TextButton(
                     onPressed: () {

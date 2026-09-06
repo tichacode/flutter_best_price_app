@@ -1,8 +1,8 @@
 import 'screen_main_drawer.dart';
-// import 'database_helper.dart' show DatabaseHelper;
 import 'screen_input.dart';
 import 'package:flutter/material.dart';
 
+// header first row: pack name, edit button, delete button
 class PackHeader extends StatelessWidget {
   final int pack_id;
   final String pack_name;
@@ -12,7 +12,7 @@ class PackHeader extends StatelessWidget {
 
   const PackHeader(this.pack_id, this.pack_name, this._refreshPack, this._onPackModifyTapped, this._deletePack);
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
@@ -21,10 +21,10 @@ class PackHeader extends StatelessWidget {
           child: Text(pack_name, style: TextStyle(fontSize: 25)),
         ),
 
+        // Edit button
         Expanded(
           flex: 8,
           child:
-            // Edit button
             IconButton (
               icon: const Icon(Icons.edit, color: Colors.grey,),
               onPressed: () {
@@ -38,10 +38,10 @@ class PackHeader extends StatelessWidget {
             ),
         ),
 
+        // Delete button
         Expanded(
           flex: 8,
           child: 
-            // Delete button
             IconButton (
               icon: const Icon(Icons.delete, color: Colors.grey,),
               onPressed: () => showDialog<String>(
@@ -59,10 +59,11 @@ class PackHeader extends StatelessWidget {
                         await _deletePack();
                         await _onPackModifyTapped("Delete");
                         if (context.mounted) {
-                          Navigator.of(context).push(
+                          Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute<void>(
                               builder: (context) => const MainScreenDrawer(),
                             ),
+                            (route) => false,
                           );
                         }
                       },
@@ -78,6 +79,7 @@ class PackHeader extends StatelessWidget {
   }
 }
 
+// hearder data part for main and result page
 class DataHeader extends StatelessWidget {
   final int flex_gap_first;
   final int flex_price;
@@ -120,9 +122,6 @@ class DataHeader extends StatelessWidget {
                 TextSpan(
                   text: "Price",
                 ),
-                // WidgetSpan(
-                //   child: Icon(Icons.monetization_on_rounded, size: 14),
-                // ),
               ],
             ),
           )
@@ -143,9 +142,6 @@ class DataHeader extends StatelessWidget {
                 TextSpan(
                   text: "Piece",
                 ),
-                // WidgetSpan(
-                //   child: Icon(Icons.monetization_on_rounded, size: 14),
-                // ),
               ],
             ),
           )
@@ -166,9 +162,6 @@ class DataHeader extends StatelessWidget {
                 TextSpan(
                   text: "Quantity",
                 ),
-                // WidgetSpan(
-                //   child: Icon(Icons.monetization_on_rounded, size: 14),
-                // ),
               ],
             ),
           )
@@ -189,9 +182,6 @@ class DataHeader extends StatelessWidget {
                 TextSpan(
                   text: "Price per unit",
                 ),
-                // WidgetSpan(
-                //   child: Icon(Icons.monetization_on_rounded, size: 14),
-                // ),
               ],
             ),
           )

@@ -27,11 +27,11 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
   @override
   void initState() {
     super.initState();
-    // dbHelper.addPack(PackPrice(id:0, name:"note2"));
     _fetchItemsPack();
     _fetchItemsPrice();
   }
 
+  // fetch data price
   Future<void> _fetchItemsPack() async {
     final data = await dbHelper.fetchPack();
     setState(() {
@@ -39,6 +39,7 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
     });
   }
 
+  // fetch data pack
   Future<void> _fetchItemsPrice() async {
     if (_selectedIndex != -1) {
       final data = await dbHelper.fetchPrice(packItems[_selectedIndex].id);
@@ -48,13 +49,14 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
     }
   }
 
+  // when drawer item tapped
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-
+  // when pack modified
   Future<void> _onPackModifyTapped(String type) async {
     if (type == "Create") {
       await _fetchItemsPack();
@@ -69,12 +71,12 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
     }
   }
 
+  // delete select pack
   Future<void> _deletePack() async {
-    MainScreenState.dbHelper.deleteAllPrice(packItems[_selectedIndex].id);
-    MainScreenState.dbHelper.deletePack(packItems[_selectedIndex].id);
+    await dbHelper.deletePackWithPrices(packItems[_selectedIndex].id);
   }
 
-
+  // set FloatingActionButton
   Widget _getFloatingActionButton() {
     if (_selectedIndex == -1) {
       return
@@ -111,6 +113,7 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
     }
   }
 
+  // get page
   Widget _getBody() {
     if (_selectedIndex == -1) {
       return Center(
@@ -157,13 +160,21 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
           },
         ),
       ),
+
+      // body
       body: _getBody(),
+
+      // floatingActionButton
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, 
       floatingActionButton: _getFloatingActionButton(),
+
+      // drawer
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
+
+            // drawer header
             const DrawerHeader(
               decoration: BoxDecoration(color: Colors.brown),
               child: Center(
@@ -174,6 +185,7 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
               ),
             ),
 
+            // drawer body (add item)
             ListTile(
               leading: Icon(Icons.add),
               title: const Text('Add'),
@@ -188,15 +200,15 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
               },
             ),
             
+            // drawer body (pack items)
             for(int i = 0; i < packItems.length; i++)
               ListTile(
                 title: Text(packItems[i].name),
                 tileColor: _selectedIndex == i ? Colors.black12 : null,
-                // selectedTileColor: Colors.grey.shade200,
                 onTap: () {
                   _onItemTapped(i);
                   _fetchItemsPrice();
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                 },
               ),
           ],
@@ -205,7 +217,6 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
     );
   }
 }
-
 
 
 class MainScreen extends StatefulWidget {
@@ -239,6 +250,7 @@ class MainScreenState extends State<MainScreen> {
       Row(
         spacing: 40,
         children: <Widget>[
+          
           // Add button
           Expanded(
             child: ElevatedButton.icon(
@@ -308,9 +320,8 @@ class MainScreenState extends State<MainScreen> {
         padding: EdgeInsets.all(20.0),
         child: CustomScrollView(
           slivers: 
-          // elementList,
           [
-            // This header stays locked at the top
+            // header locked at the top
             PinnedHeaderSliver(
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -322,6 +333,7 @@ class MainScreenState extends State<MainScreen> {
               ),
             ),
             
+            // body (if no items)
             widget.items.isEmpty
             ? const SliverToBoxAdapter(
                 child: Center(
@@ -332,7 +344,7 @@ class MainScreenState extends State<MainScreen> {
                 ),
               )
 
-            // The scrollable body content
+            // body (scrollable)
             : SliverList(
               delegate: SliverChildBuilderDelegate(
                   (context, i) => _ItemList(widget.items[i].id, widget.pack_id, widget.items[i].price, widget.items[i].piece, widget.items[i].quantity, widget.items[i].note, widget.fetchItemsPrice),
@@ -344,6 +356,7 @@ class MainScreenState extends State<MainScreen> {
       );
   }
 }
+
 
 class _ItemList extends StatelessWidget {
   final int id;
@@ -362,6 +375,7 @@ class _ItemList extends StatelessWidget {
 
     dataRowList.add(SizedBox(height: 10),);
 
+    // price data
     dataRowList.add(
       Row(
         children: <Widget>[
@@ -378,10 +392,10 @@ class _ItemList extends StatelessWidget {
             child: Text(quantity.toString(), textAlign: TextAlign.center),
           ),
 
+          // Edit button
           Expanded(
             flex: 8,
             child:
-              // Edit button
               IconButton (
                 icon: const Icon(Icons.edit),
                 onPressed: () {
@@ -395,10 +409,10 @@ class _ItemList extends StatelessWidget {
               ),
           ),
 
+          // Delete button
           Expanded(
             flex: 8,
             child: 
-              // Delete button
               IconButton (
                 icon: const Icon(Icons.delete),
                 onPressed: () => showDialog<String>(
@@ -430,32 +444,29 @@ class _ItemList extends StatelessWidget {
       )
     );
 
+    // note
     dataRowList.add(
       Row(
         children: <Widget>[
           Expanded(
-            // flex: 3,
             child: Text('Note: $note', textAlign: TextAlign.left),
           )
         ]
       )
     );
 
+    // divider
     dataRowList.add(
-      // Row(
-        const Divider(
-          thickness: 0.5,
-          color: Colors.grey,
-        )
-      // )
+      const Divider(
+        thickness: 0.5,
+        color: Colors.grey,
+      )
     );
 
     return 
       SizedBox(
         width: double.maxFinite,
         child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          // spacing: 20.0,
           children: dataRowList
         )
       );
