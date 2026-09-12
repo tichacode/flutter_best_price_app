@@ -182,6 +182,24 @@ class DataHeader extends StatelessWidget {
                 TextSpan(
                   text: "Price per unit",
                 ),
+                // WidgetSpan(
+                //   child: IconButton (
+                //     icon: const Icon(Icons.info_outline_rounded, size: 14, color: Colors.grey,),
+                //     onPressed: () => showDialog<String>(
+                //       context: context,
+                //       builder: (BuildContext context) => AlertDialog(
+                //         title: const Text('Price per unit'),
+                //         content: const Text('Price per unit = Price ÷ ( Piece x Quantity )'),
+                //         actions: <Widget>[
+                //           TextButton(
+                //             onPressed: () => Navigator.pop(context),
+                //             child: const Text('OK'),
+                //           ),
+                //         ],
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           )

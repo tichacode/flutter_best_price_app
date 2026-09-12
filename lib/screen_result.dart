@@ -79,21 +79,43 @@ class _CalculateResulScreenState extends State<CalculateResultScreen> {
       PackHeader(widget.pack_id, packName, _refreshPack, widget.onPackModifyTapped, widget.deletePack)
     );
 
+    // pinHeaderList.add(
+    //   Row(
+    //     children: <Widget>[
+    //       // Back
+    //       Expanded(
+    //         child: ElevatedButton(
+    //           onPressed: () {
+    //             Navigator.pop(context);
+    //           },
+    //           child: const Text('Back'),
+    //         ),
+    //       ),
+    //     ]
+    //   )
+    // );
+
     pinHeaderList.add(
       Row(
         children: <Widget>[
-          // Back
           Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Back'),
-            ),
+            flex: 100,
+            child: Text("Price per unit = Price ÷ ( Piece x Quantity )", style: TextStyle(fontSize: 14, color: Colors.grey), textAlign: TextAlign.center,)
           ),
         ]
       )
     );
+
+    pinHeaderList.add(
+      Row(
+        children: <Widget>[
+          Expanded(
+            child: SizedBox(height: 5)
+          ),
+        ]
+      )
+    );
+
 
     // header
     pinHeaderList.add(DataHeader(8, 23, 23, 23, 23, 0));
@@ -187,7 +209,7 @@ class _ItemResultList extends StatelessWidget {
                   text: rankStr,
                 ),
                 WidgetSpan(
-                  child: Image.asset("icon_crown.png", color: rankColor,),
+                  child: Image.asset("assets/icon_crown.png", color: rankColor,),
                 ),
               ],
             ),

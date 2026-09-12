@@ -61,6 +61,7 @@ class _MainScreenDrawerState extends State<MainScreenDrawer> {
     if (type == "Create") {
       await _fetchItemsPack();
       _onItemTapped(packItems.length - 1);
+      await _fetchItemsPrice();
     } 
     else if (type == "Delete") {
       _onItemTapped(-1);

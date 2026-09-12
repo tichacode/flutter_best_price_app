@@ -241,7 +241,7 @@ class DatabaseHelper {
       if (price == 0) {
         calVal = 0;
       } else {
-        calVal = double.parse((price / (piece * quantity)).toStringAsFixed(2));
+        calVal = double.parse((price / (piece * quantity)).toStringAsFixed(4));
       }
       item.add(ProductCal(id: id, price: price, piece: piece, quantity: quantity, calculate: calVal, note: note));
       await _updateCalculate(id, calVal);

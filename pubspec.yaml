@@ -39,6 +39,8 @@ dependencies:
   # sqflite_common_ffi: ^2.3.0
   sqflite_common_ffi_web: ^1.1.1
   path_provider: ^2.1.6
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
@@ -53,6 +55,27 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon square - best price.png"
+  adaptive_icon_foreground: "assets/icon/icon foreground.png"
+  adaptive_icon_background: "assets/icon/icon background.png"
+
+flutter_native_splash:
+  android: true
+  ios: true
+  color: "#FFF1EC"
+  image: "assets/splash/splash icon.png"
+  branding: "assets/splash/tichacode.png"
+
+  branding_bottom_padding_ios: 35
+
+  android_12:
+    color: "#FFF1EC"
+    image: "assets/splash/splash 1152 - android12.png"
+    branding: "assets/splash/tichacode.png"
 
 # The following section is specific to Flutter packages.
 flutter:
