@@ -3,6 +3,7 @@
 Framework : Flutter\
 A simple Flutter app that helps you find the cheapest option among similar products — by comparing **price per unit**
 
+https://github.com/user-attachments/assets/c6e482b1-c5fc-4241-8747-bfb2d5dda0ca
  
 ## 📌 Description
 
